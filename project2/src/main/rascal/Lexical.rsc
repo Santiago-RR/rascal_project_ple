@@ -2,18 +2,17 @@ module Lexical
 
 layout Layout = WhitespaceAndComment* !>> [\ \t\n\r#];
 
-lexical WhitespaceAndComment = 
-    [\ \t\n\r] 
+lexical WhitespaceAndComment =
+    [\ \t\n\r]
   | @category="Comment" "#" ![\n]* $;
 
-lexical Id = 
-[a-z] [a-zA-Z0-9]* !>> [a-zA-Z0-9];
+// Identificador: minúscula inicial, luego letras, dígitos o guiones; no puede ser reservada
+lexical Id = @category="Variable" ([a-z] [a-zA-Z0-9\-]* !>> [a-zA-Z0-9\-]) \ Keywords;
 
-lexical TypeId = 
-[A-Z] [a-zA-Z0-9]* !>> [a-zA-Z0-9];
+// Nombres de objetos, tipos y parámetros genéricos: mayúscula inicial
+lexical TypeId = @category="Type" ([A-Z] [a-zA-Z0-9\-]* !>> [a-zA-Z0-9\-]) \ Keywords;
 
-// Palabras reservadas del lenguaje
-keyword Keywords = "object" | "method" | "main" | 
-"extends" | "override" | "val" | "var" | "if" | "else" |
-"for" | "in" | "new" | "true" | "false" | "String" | "Integer" | 
+keyword Keywords = "object" | "method" | "main" |
+"extends" | "override" | "val" | "var" | "if" | "then" | "else" |
+"for" | "in" | "new" | "true" | "false" | "String" | "Integer" |
 "Boolean" | "and" | "or" | "neg";
