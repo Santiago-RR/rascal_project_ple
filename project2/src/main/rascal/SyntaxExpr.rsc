@@ -14,8 +14,8 @@ syntax Expression
   | variable: Id name !>> "("
   | call: Id name "(" {Expression ","}* args ")"        // llamada libre, ej. print(...)
   | paren: "(" Expression expr ")"
-  | newObject: "new" Type objType !>> "(" Block?
-  | newObjectArgs: "new" Type objType NewArgs ctorArgs Block?
+  | newObject: "new" Type objType !>> "(" ObjectBody?
+  | newObjectArgs: "new" Type objType NewArgs ctorArgs ObjectBody?
   > left ( memberAccess: Expression target "." Id member !>> "("
          | methodCall: Expression target "." Id member "(" {Expression ","}* args ")" )
   > neg: "neg" Expression expr

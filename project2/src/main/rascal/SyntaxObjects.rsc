@@ -1,62 +1,83 @@
 module SyntaxObjects
 
 import Lexical;
-//import SyntaxExpr; 
 
-start syntax Module = prog: DefObject* defs MainMethod main DefObject* otherDefs;
+// El programa siempre tiene exactamente un punto de entrada. Las definiciones
+// pueden aparecer antes o después de main, como en los ejemplos del enunciado.
+start syntax Module = prog: Definition* defs MainMethod main Definition* otherDefs;
 
-syntax MainMethod = 
-mainMethod: "method" "main" "{" Instruction* instructions "}";
+syntax Definition
+  = objectDef: DefObject
+  | methodDef: DefMethod
+  ;
 
-syntax DefObject = 
-defObject: "object" TypeId name GenericParams? Extends? Constructor? Block?;
+syntax MainMethod = mainMethod: "method" "main" Block body;
 
-syntax Extends = 
-extends: "extends" TypeId;
+// Objetos, herencia y parámetros de tipo
+syntax DefObject = defObject: "object" TypeId name GenericParams? params Extends? parent Constructor? constructor ObjectBody? body;
 
-syntax GenericParams = 
-genericParams: "[" {GenericParameter ","}+ "]";
+syntax GenericParams = genericParams: "[" {GenericParameter ","}+ params "]";
+syntax GenericParameter = genericParameter: Variance? variance TypeId name;
 
-syntax GenericParameter = 
-genericParameter: Variance? TypeId name;
+syntax Variance
+  = plus: "+"
+  | minus: "-"
+  ;
 
-syntax Variance = 
-    plus: "+" 
-  | minus: "-";
+syntax Extends = extends: "extends" TypeId superType;
+syntax Constructor = constructor: "(" {ParamDecl ","}* params ")";
 
-syntax Constructor = 
-constructor: "(" {ParamDecl ","}* params ")";
+// Un cuerpo de objeto contiene miembros; un Block contiene instrucciones.
+// Mantenerlos separados evita que un método se confunda con una instrucción.
+syntax ObjectBody = objectBody: "{" Member* members "}";
 
-syntax ParamDecl = 
-paramDecl: ("val" | "var") TypeId name ":" Type;
+syntax Member
+  = field: Declaration
+  | method: DefMethod
+  ;
 
-syntax DefMethod = 
-defMethod: "override"? TypeId? name "="? "method" "(" {MethodParam ","}* params ")" (":" Type)? ("=" (Expression | Block))?;
+// Forma calificada del Snippet 2: Cat.talk = method() : String { ... }
+// Forma miembro del Snippet 3: override transform(animal: Animal): DogFood = { ... }
+syntax DefMethod
+  = qualifiedMethod: TypeId owner "." Id name "=" "method" "(" {MethodParam ","}* params ")" (":" Type)? returnType MethodBody? body
+  | memberMethod: Override? override Id name ("=" "method")? marker "(" {MethodParam ","}* params ")" (":" Type)? returnType "="? MethodBody body
+  ;
 
-syntax MethodParam = 
-methodParam: TypeId name ":" Type;
+syntax Override = override: "override";
+syntax MethodParam = methodParam: Id name ":" Type paramType;
 
-syntax Type = 
-primitive: PrimitiveType
-  | user: UserType;
+syntax MethodBody
+  = bodyBlock: Block
+  | bodyExpression: Expression
+  ;
 
-syntax PrimitiveType = 
-string: "String"
+// Los tipos de usuario y los nombres de objetos usan TypeId; las variables y
+// parámetros usan Id. Así List[Dog] y val item: A son ambos válidos.
+syntax Type
+  = primitive: PrimitiveType
+  | user: UserType
+  ;
+
+syntax PrimitiveType
+  = string: "String"
   | integer: "Integer"
-  | boolean: "Boolean";
+  | boolean: "Boolean"
+  ;
 
-syntax UserType = 
-userType: TypeId name TypeArgs?;
+syntax UserType = userType: TypeId name TypeArgs? args;
+syntax TypeArgs = typeArgs: "[" {Type ","}+ args "]";
 
-syntax TypeArgs = 
-typeArgs: "[" {Type ","}+ "]";
+syntax Binding
+  = val: "val"
+  | var: "var"
+  ;
 
-syntax Declaration = 
-declaration: ("val" | "var") TypeId name (":" Type)? "=" Expression;
+syntax ParamDecl = paramDecl: Binding mode Id name ":" Type paramType;
+syntax Declaration = declaration: Binding mode Id name (":" Type)? declaredType "=" Expression expr;
 
-syntax Instruction = 
-decl: Declaration
-  | expr: Expression;
+syntax Instruction
+  = decl: Declaration
+  | expr: Expression
+  ;
 
-syntax Block = 
-block: "{" Instruction* instructions "}";
+syntax Block = block: "{" Instruction* instructions "}";
