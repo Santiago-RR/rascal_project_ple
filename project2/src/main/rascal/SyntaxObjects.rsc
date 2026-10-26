@@ -1,5 +1,6 @@
 module SyntaxObjects
 
+import SyntaxExpr;
 import Lexical;
 
 // El programa siempre tiene exactamente un punto de entrada. Las definiciones
@@ -39,18 +40,19 @@ syntax Member
 // Forma calificada del Snippet 2: Cat.talk = method() : String { ... }
 // Forma miembro del Snippet 3: override transform(animal: Animal): DogFood = { ... }
 syntax DefMethod
-  = qualifiedMethod: TypeId owner "." Id name "=" "method" "(" {MethodParam ","}* params ")" (":" Type)? returnType MethodBody? body
-  | memberMethod: Override? override Id name ("=" "method")? marker "(" {MethodParam ","}* params ")" (":" Type)? returnType "="? MethodBody body
+  = qualifiedMethod: TypeId owner "." Id name "=" "method" "(" {MethodParam ","}* params ")" (":" Type)? returnType MethodBody? qualifiedBody
+  | memberMethod: Override? override Id name "(" {MethodParam ","}* params ")" (":" Type)? returnType MethodBody body
+  | memberMethod: Override? override Id name "=" "method" "(" {MethodParam ","}* params ")" (":" Type)? returnType MethodBody body
   ;
 
 syntax Override = override: "override";
 syntax MethodParam = methodParam: Id name ":" Type paramType;
 
 syntax MethodBody
-  = bodyBlock: Block
-  | bodyExpression: Expression
+  = bodyBlock: Block blockBody
+  | bodyBlock: "=" Block blockBody
+  | bodyExpression: "=" Expression exprBody
   ;
-
 // Los tipos de usuario y los nombres de objetos usan TypeId; las variables y
 // parámetros usan Id. Así List[Dog] y val item: A son ambos válidos.
 syntax Type

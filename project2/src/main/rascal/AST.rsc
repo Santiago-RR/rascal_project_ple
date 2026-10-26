@@ -4,6 +4,14 @@ import Lexical;
 import SyntaxObjects;
 import SyntaxExpr;
 
+alias Id = str;
+alias TypeId = str;
+alias IntLit = str;
+alias StrPlain = str;
+alias StrPre = str;
+alias StrMid = str;
+alias StrPost = str;
+
 // Cada constructor replica exactamente los campos no literales de la producción
 // con la misma etiqueta. Esto permite usar implode(#AST::X, parse(...)).
 data Module = prog(list[Definition] defs, MainMethod main, list[Definition] otherDefs);
@@ -28,14 +36,16 @@ data Member = field(Declaration field) | method(DefMethod method);
 
 data DefMethod
   = qualifiedMethod(TypeId owner, Id name, list[MethodParam] params,
-                    list[Type] returnType, list[MethodBody] body)
+                    list[Type] returnType, list[MethodBody] qualifiedBody)
   | memberMethod(list[Override] override, Id name, list[MethodParam] params,
                  list[Type] returnType, MethodBody body)
   ;
 
 data Override = override();
 data MethodParam = methodParam(Id name, Type paramType);
-data MethodBody = bodyBlock(Block body) | bodyExpression(Expression body);
+data MethodBody 
+  = bodyBlock(Block blockBody) 
+  | bodyExpression(Expression exprBody);
 
 data Type = primitive(PrimitiveType prim) | user(UserType user);
 data PrimitiveType = string() | integer() | boolean();
@@ -79,6 +89,8 @@ data Expression
 data NewArgs = newArgs(list[Expression] args);
 data Literal = intLit(IntLit n) | trueLit() | falseLit() | stringLit(StringLiteral s);
 data StringLiteral = plain(StrPlain text) | interpolated(StrPre pre, Expression expr, StrTail tail);
-data StrTail = mid(StrMid text, Expression expr, StrTail tail) | post(StrPost text);
+data StrTail 
+  = mid(StrMid midText, Expression expr, StrTail tail) 
+  | post(StrPost postText);
 data ForLoop = forLoop(IterationPattern pattern, Expression source, Instruction body);
 data IterationPattern = single(Id name) | tupleOf(list[Id] names);
