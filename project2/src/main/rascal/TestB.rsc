@@ -6,6 +6,7 @@ import Lexical;
 import SyntaxObjects;
 import SyntaxExpr;
 import AST;
+import String;
 
 // Intenta parsear + implode de una instrucción (prueba el for)
 void inst(str src) {
