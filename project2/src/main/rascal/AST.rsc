@@ -11,6 +11,9 @@ alias StrPlain = str;
 alias StrPre = str;
 alias StrMid = str;
 alias StrPost = str;
+alias StrPreSimple = str;
+alias StrMidSimple = str;
+alias StrPostSimple = str;
 
 // Cada constructor replica exactamente los campos no literales de la producción
 // con la misma etiqueta. Esto permite usar implode(#AST::X, parse(...)).
@@ -65,9 +68,9 @@ data Expression
   | call(Id name, list[Expression] args)
   | paren(Expression expr)
   | newObject(Type objType, list[ObjectBody] body)
-  | newObjectArgs(Type objType, NewArgs ctorArgs, list[ObjectBody] body)
-  | memberAccess(Expression target, Id member)
-  | methodCall(Expression target, Id member, list[Expression] args)
+  | newObjectArgs(Type objType, NewArguments ctorArgs, list[ObjectBody] body)
+  | memberAccess(Expression target, MemberName member)
+  | methodCall(Expression target, MemberName member, list[Expression] args)
   | neg(Expression expr)
   | power(Expression lhs, Expression rhs)
   | mul(Expression lhs, Expression rhs)
@@ -86,11 +89,19 @@ data Expression
   | conditional(Expression cond, Expression thenBranch, Expression elseBranch)
   ;
 
-data NewArgs = newArgs(list[Expression] args);
+data MemberName = lower(Id name) | upper(TypeId name);
+
+data NewArguments = newArguments(list[Expression] args);
 data Literal = intLit(IntLit n) | trueLit() | falseLit() | stringLit(StringLiteral s);
-data StringLiteral = plain(StrPlain text) | interpolated(StrPre pre, Expression expr, StrTail tail);
-data StrTail 
-  = mid(StrMid midText, Expression expr, StrTail tail) 
-  | post(StrPost postText);
+data StringLiteral
+  = plain(StrPlain text)
+  | interpolated(StrPre pre, Expression expr, StrTail tail)
+  | interpolatedName(StrPreSimple pre, Id name, StrTailSimple simpleTail);
+data StrTail
+  = mid(StrMid text, Expression expr, StrTail tail)
+  | post(StrPost text);
+data StrTailSimple
+  = midSimple(StrMidSimple text, Id name, StrTailSimple tail)
+  | postSimple(StrPostSimple text);
 data ForLoop = forLoop(IterationPattern pattern, Expression source, Instruction body);
 data IterationPattern = single(Id name) | tupleOf(list[Id] names);

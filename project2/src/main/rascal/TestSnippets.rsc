@@ -43,8 +43,8 @@ method main {
     }
   }
 
-  # Contravariance (-In): Animal is a supertype of Puppy (Accepts broader input)
-  # Covariance (+Out): DogFood is a subtype of Food (Returns narrower output)
+  // Contravariance (-In): Animal is a supertype of Puppy (Accepts broader input)
+  // Covariance (+Out): DogFood is a subtype of Food (Returns narrower output)
   val puppyFeeder: Transformer[Puppy, Food] = animalFeeder
 
   val myPuppy = new Puppy
@@ -67,14 +67,11 @@ void check(str name, str src) {
   try {
     parse(#start[Module], src);
     println("<name>: OK");
-  } catch ParseError(loc l): {
-    println("<name>: ERROR de sintaxis en línea <l.begin.line>, col <l.begin.column>");
-  } catch Ambiguity(loc l, str a, str b): {
-    println("<name>: AMBIGUO");
-  }
+  } catch e:
+    println("<name>: ERROR de parseo (<e>)");
 }
 
-void main(int dummy = 0) {
+void main(list[str] args) {
   check("Snippet 1", s1);
   check("Snippet 2", s2);
   check("Snippet 3", s3);

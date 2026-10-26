@@ -3,7 +3,7 @@ module Main
 import IO;
 import Implode;
 
-int main(int testArgument=0) {
-    println("argument: <testArgument>");
-    return testArgument;
+int main(list[str] args) {
+    println("arguments: <args>");
+    return 0;
 }
