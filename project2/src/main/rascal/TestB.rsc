@@ -29,7 +29,7 @@ void main(list[str] args) {
   inst("print(if a then b else c + 1)");
 
   // Highlighting: categorías asignadas
-  Tree t = parse(#start[Module], "method main {\n  val max = if a \> b then 10 else b # comentario\n  print(\"hola $max\")\n}");
+  Tree t = parse(#start[Module], "method main {\n  val max = if a \> b then 10 else b // comentario\n  print(\"hola $max\")\n}");
   for (/a:appl(prod(_, _, {*_, \tag("category"(str cat))}), _) := t)
     println("  <cat>: <trim("<a>")>");
 }

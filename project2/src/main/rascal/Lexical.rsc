@@ -4,7 +4,7 @@ layout Layout = WhitespaceAndComment* !>> [\ \t\n\r#];
 
 lexical WhitespaceAndComment =
     [\ \t\n\r]
-  | @category="Comment" "#" ![\n]* $;
+  | @category="Comment" "//" ![\n]* $;
 
 // Identificador: minúscula inicial, luego letras, dígitos o guiones bajos; no puede ser reservada
 lexical Id = @category="Variable" ([a-z] [a-zA-Z0-9_]* !>> [a-zA-Z0-9_]) \ Keywords;
