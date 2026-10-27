@@ -71,7 +71,7 @@ void check(str name, str src) {
     println("<name>: ERROR de parseo (<e>)");
 }
 
-void main(list[str] args) {
+void main(list[str] args=[]) {
   check("Snippet 1", s1);
   check("Snippet 2", s2);
   check("Snippet 3", s3);

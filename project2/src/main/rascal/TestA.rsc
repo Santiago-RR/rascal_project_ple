@@ -49,7 +49,7 @@ void testModule(str src) {
   }
 }
 
-void main(list[str] args) {
+void main(list[str] args=[]) {
   println("=== Pruebas Persona A: Estructura, Objetos y Métodos ===");
 
   println("\n--- 1. Objetos, Herencia y Constructores ---");

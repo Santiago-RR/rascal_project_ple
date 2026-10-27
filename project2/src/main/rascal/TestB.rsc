@@ -16,7 +16,7 @@ void inst(str src) {
   } catch ParseError(loc l): println("<src>\n   =\> ERROR de parseo");
 }
 
-void main(list[str] args) {
+void main(list[str] args=[]) {
   inst("for (i \<- xs) print(i)");
   inst("for ((name, rating) \<- ratings) print(\"Movie: $name, Rating: $rating\")");
   inst("for (x \<- xs) for (y \<- ys) print(x + y)");
