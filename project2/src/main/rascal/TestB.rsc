@@ -20,7 +20,7 @@ void main(list[str] args=[]) {
   inst("for (i \<- xs) print(i)");
   inst("for ((name, rating) \<- ratings) print(\"Movie: $name, Rating: $rating\")");
   inst("for (x \<- xs) for (y \<- ys) print(x + y)");
-  inst("for (item_1 \<- xs) print(\"item_1: $item_1\")");
+  inst("for (item-1 \<- xs) print(\"item-1: $item-1\")");
   inst("for (x \<- xs) print(x-y)");
   inst("print(\"Resulting food type: ${resultantFood.getClass.getSimpleName}\")");
   inst("print(neg a ** b)");

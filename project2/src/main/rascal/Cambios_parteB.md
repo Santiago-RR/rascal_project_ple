@@ -22,13 +22,13 @@ Cambios respecto a la gramática del Proyecto 1. No se usó la solución de otro
   - Se aceptan las dos formas que aparecen en los ejemplos: `$name` (Snippet 4) y `${expr}` (Snippet 1). La del Proyecto 1 solo cubría `${expr}`.
   - `$name` se conserva en el AST como `interpolatedName`, con sus nombres sucesivos en `StrTailSimple`.
   - La cadena se parte en trozos léxicos (`StrPlain`, `StrPre`, `StrMid`, `StrPost` y sus variantes simples) para que los espacios dentro del texto no se traten como layout. Se reemplazó la regla `string_char`, que no estaba definida.
-- **`new` con o sin argumentos.** Se separó en dos producciones (`newObject` y `newObjectArgs`), ambas con bloque opcional para el cuerpo anónimo del Snippet 3.
+- **`new` con o sin argumentos.** Se separó en dos producciones (`newObject` y `newObjectArgs`), ambas con `ObjectBody` opcional para el cuerpo anónimo del Snippet 3.
 - **`for`.** Patrón simple (`i`) o en tupla (`(name, rating)`), con `<-`. Es una instrucción, no una expresión.
 
 ## 3. Decisiones y limitaciones
 
 - **Paréntesis pegado a la llamada.** Como no hay terminador de instrucción, `print ("x")` (con espacio) se podía leer como `print` seguido de `("x")`. Se agregaron restricciones `!>> "("` en las variables, en el acceso a miembros y en `new`. El `(` de una llamada debe ir pegado al nombre.
-- **Guion bajo y resta.** Los identificadores usan `_`, como en la gramática del Proyecto 1. El `-` queda disponible para la resta, incluso sin espacios (`a-b`).
+- **Guiones en identificadores.** Los identificadores empiezan con una minúscula y continúan con letras, dígitos o guiones (`[a-z][a-zA-Z0-9\-]*`). Por eso `a-b` es un solo identificador, no una resta; los guiones bajos no forman parte del lenguaje.
 - **`if-then-else`.** Es la expresión de menor precedencia: la rama `else` abarca todo lo que pueda (`if a then b else c + 1` es `if a then b else (c + 1)`). Puede usarse como operando derecho sin paréntesis (`1 + if a then b else c`).
 
 ## 4. AST
@@ -39,5 +39,5 @@ Cada alternativa de `Expression`, `Literal`, `StringLiteral` y `ForLoop` tiene s
 
 - Los 4 snippets del enunciado parsean sin ambigüedad.
 - Precedencia, asociatividad y `implode` de expresiones, interpolaciones y bucles `for` (simples, en tupla y anidados).
-- Las pruebas incluyen interpolación simple múltiple (`$name`), identificadores con `_`, resta sin espacios y acceso a miembros con nombres en minúscula.
+- Las pruebas incluyen interpolación simple múltiple (`$name`), identificadores con guiones, `a-b` como un solo identificador y acceso a miembros con nombres en minúscula.
 - También se prueba la precedencia de negación, potencia, aritmética, lógica y condicionales.

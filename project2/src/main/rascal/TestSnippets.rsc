@@ -76,5 +76,5 @@ void main(list[str] args=[]) {
   check("Snippet 2", s2);
   check("Snippet 3", s3);
   check("Snippet 4", s4);
-  check("Llamada con espacio antes del paréntesis", s5);
+  check("Llamada con espacio antes del paréntesis (esta debera fallar)", s5);
 }
