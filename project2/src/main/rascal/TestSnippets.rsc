@@ -55,7 +55,7 @@ method main {
 
 str s4 = "method main {
   val max = if a \> b then a else b
-  for ((name, rating) \<- ratings) print(\"Movie: $name, Rating: $rating\")
+  for ((name, rating) \<- ratings) { print(\"Movie: $name, Rating: $rating\") }
 }";
 
 str s5 = "method main {

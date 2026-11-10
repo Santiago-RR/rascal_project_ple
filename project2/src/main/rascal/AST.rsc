@@ -86,6 +86,8 @@ data Expression
   | eq(Expression lhs, Expression rhs)
   | andExpr(Expression lhs, Expression rhs)
   | orExpr(Expression lhs, Expression rhs)
+  | range(Expression from, Expression to)
+  | lambda(IterationPattern param, Expression result)
   | conditional(Expression cond, Expression thenBranch, Expression elseBranch)
   ;
 
@@ -103,5 +105,5 @@ data StrTail
 data StrTailSimple
   = midSimple(StrMidSimple text, Id name, StrTailSimple tail)
   | postSimple(StrPostSimple text);
-data ForLoop = forLoop(IterationPattern pattern, Expression source, Instruction body);
+data ForLoop = forLoop(IterationPattern pattern, Expression source, Block body);
 data IterationPattern = single(Id name) | tupleOf(list[Id] names);

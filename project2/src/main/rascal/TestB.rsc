@@ -17,11 +17,21 @@ void inst(str src) {
 }
 
 void main(list[str] args=[]) {
-  inst("for (i \<- xs) print(i)");
-  inst("for ((name, rating) \<- ratings) print(\"Movie: $name, Rating: $rating\")");
-  inst("for (x \<- xs) for (y \<- ys) print(x + y)");
-  inst("for (item-1 \<- xs) print(\"item-1: $item-1\")");
-  inst("for (x \<- xs) print(x-y)");
+  // for con "\<-" y cuerpo delimitado por bloque
+  inst("for (i \<- xs) { print(i) }");
+  inst("for ((name, rating) \<- ratings) { print(\"Movie: $name, Rating: $rating\") }");
+  inst("for (x \<- xs) { for (y \<- ys) { print(x + y) } }");
+  inst("for (item-1 \<- xs) { print(\"item-1: $item-1\") }");
+  inst("for (x \<- xs) { print(x-y) }");
+  // for con "in" como alternativa a "\<-"
+  inst("for (i in xs) { print(i) }");
+  // for con rango usando el operador "-\>"
+  inst("for (i \<- 1 -\> 10) { print(i) }");
+  inst("for (i in 0 -\> n) { print(i) }");
+  // operador de rango y lambda como expresiones
+  inst("print(1 -\> 10)");
+  inst("print(xs =\> x + 1)");
+  inst("print((a, b) =\> a + b)");
   inst("print(\"Resulting food type: ${resultantFood.getClass.getSimpleName}\")");
   inst("print(neg a ** b)");
   inst("print(a + b * c)");

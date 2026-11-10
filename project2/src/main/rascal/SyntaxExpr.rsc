@@ -33,6 +33,10 @@ syntax Expression
               | eq: Expression lhs "=" Expression rhs )
   > left andExpr: Expression lhs "and" Expression rhs
   > left orExpr: Expression lhs "or" Expression rhs
+  // Rango: "1 -> 10" produce la secuencia de enteros. No asociativo (1 -> 2 -> 3 es inválido).
+  > non-assoc range: Expression from "-\>" Expression to
+  // Lambda / transformación: "x =\> x + 1". Asociativa a la derecha para encadenar.
+  > right lambda: IterationPattern param "=\>" Expression result
   > conditional: "if" Expression cond "then" Expression thenBranch "else" Expression elseBranch
   ;
 
@@ -84,7 +88,14 @@ lexical StrPostSimple = @category="Constant" StrChar* "\"";
 // Control de flujo: for
 syntax Instruction = control: ForLoop;
 
-syntax ForLoop = forLoop: "for" "(" IterationPattern pattern "\<-" Expression source ")" Instruction body;
+// El origen de la iteración puede escribirse con "\<-" o con "in" (ambos en la
+// especificación). El cuerpo es un Block "{ ... }", para que quede bien
+// delimitado y no se confunda con la instrucción que siga al for. El origen
+// puede ser cualquier Expression, incluido un rango "1 -\> 10".
+syntax ForLoop
+  = forLoop: "for" "(" IterationPattern pattern "\<-" Expression source ")" Block body
+  | forLoop: "for" "(" IterationPattern pattern "in" Expression source ")" Block body
+  ;
 
 syntax IterationPattern
   = single: Id name
