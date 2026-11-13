@@ -64,6 +64,7 @@ syntax PrimitiveType
   = string: "String"
   | integer: "Integer"
   | boolean: "Boolean"
+  | character: "Char"
   ;
 
 syntax UserType = userType: TypeId name TypeArgs? args;

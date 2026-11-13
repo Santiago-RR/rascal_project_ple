@@ -15,4 +15,4 @@ lexical TypeId = @category="Type" ([A-Z] [a-zA-Z0-9\-]* !>> [a-zA-Z0-9\-]) \ Key
 keyword Keywords = "object" | "method" | "main" |
 "extends" | "override" | "val" | "var" | "if" | "then" | "else" |
 "for" | "in" | "new" | "true" | "false" | "String" | "Integer" |
-"Boolean" | "and" | "or" | "neg";
+"Boolean" | "Char" | "and" | "or" | "neg";

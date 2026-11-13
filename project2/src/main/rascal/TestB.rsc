@@ -38,6 +38,11 @@ void main(list[str] args=[]) {
   inst("print(a and b or c)");
   inst("print(if a then b else c + 1)");
 
+  // Literal de carácter (Tarea 1): 'a', un escape, y declaración con tipo Char
+  inst("print(\'a\')");
+  inst("print(\'\\n\')");
+  inst("val c: Char = \'x\'");
+
   // Highlighting: categorías asignadas
   Tree t = parse(#start[Module], "method main {\n  val max = if a \> b then 10 else b // comentario\n  print(\"hola $max\")\n}");
   for (/a:appl(prod(_, _, {*_, \tag("category"(str cat))}), _) := t)

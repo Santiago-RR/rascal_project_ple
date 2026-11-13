@@ -52,10 +52,16 @@ syntax Literal
   = intLit: IntLit n
   | trueLit: "true"
   | falseLit: "false"
+  | charLit: CharLit c
   | stringLit: StringLiteral s
   ;
 
 lexical IntLit = @category="Constant" [0-9]+ !>> [0-9];
+
+// Literal de carácter: un carácter entre comillas simples, ej. 'a' o un escape '\n'.
+// El cuerpo es un carácter normal (ni comilla simple ni backslash) o un escape.
+lexical CharLit = @category="Constant" "\'" CharChar "\'";
+lexical CharChar = ![\'\\] | [\\] [\'\"\\nt];
 
 // Cadenas con interpolación: "texto $id texto ${expresión} texto"
 // Se parte la cadena en trozos léxicos (pre/mid/post) para que los espacios dentro

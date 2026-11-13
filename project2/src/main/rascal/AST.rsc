@@ -7,6 +7,7 @@ import SyntaxExpr;
 alias Id = str;
 alias TypeId = str;
 alias IntLit = str;
+alias CharLit = str;
 alias StrPlain = str;
 alias StrPre = str;
 alias StrMid = str;
@@ -51,7 +52,7 @@ data MethodBody
   | bodyExpression(Expression exprBody);
 
 data Type = primitive(PrimitiveType prim) | user(UserType user);
-data PrimitiveType = string() | integer() | boolean();
+data PrimitiveType = string() | integer() | boolean() | character();
 data UserType = userType(TypeId name, list[TypeArgs] args);
 data TypeArgs = typeArgs(list[Type] args);
 
@@ -94,7 +95,7 @@ data Expression
 data MemberName = lower(Id name) | upper(TypeId name);
 
 data NewArguments = newArguments(list[Expression] args);
-data Literal = intLit(IntLit n) | trueLit() | falseLit() | stringLit(StringLiteral s);
+data Literal = intLit(IntLit n) | trueLit() | falseLit() | charLit(CharLit c) | stringLit(StringLiteral s);
 data StringLiteral
   = plain(StrPlain text)
   | interpolated(StrPre pre, Expression expr, StrTail tail)
