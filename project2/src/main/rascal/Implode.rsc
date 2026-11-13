@@ -2,6 +2,7 @@ module Implode
 
 import ParseTree;
 import AST;
+import Lexical;
 import SyntaxObjects;
 import SyntaxExpr;
 

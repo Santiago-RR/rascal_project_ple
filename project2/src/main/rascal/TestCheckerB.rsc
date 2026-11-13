@@ -1,12 +1,7 @@
 module TestCheckerB
 
-/*
- * Pruebas del type checker de la parte B (CheckerB.rsc), sobre expresiones e
- * instrucciones aisladas. No depende del checker de objetos de A.
- *
- * Cada caso parsea una expresión/instrucción, corre el checker y cuenta los
- * errores. Se compara el número de errores contra lo esperado.
- */
+// Pruebas del type checker de la parte B (CheckerB.rsc): cada caso compara el
+// número de errores de tipo obtenido contra el esperado.
 
 import IO;
 import ParseTree;
@@ -18,7 +13,6 @@ import CheckerB;
 
 int errorsOf(list[Message] msgs) = (0 | it + 1 | m <- msgs, error(_, _) := m);
 
-// Prueba una expresión: parsea, chequea y compara el nº de errores con expected.
 void expectExpr(str src, int expected) {
   try {
     Expression e = parse(#Expression, src);
@@ -30,7 +24,6 @@ void expectExpr(str src, int expected) {
   } catch e: println("[ERROR parseo] \"<src>\": <e>");
 }
 
-// Prueba una instrucción (for, etc.).
 void expectInst(str src, int expected) {
   try {
     Instruction i = parse(#Instruction, src);

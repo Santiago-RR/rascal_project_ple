@@ -10,9 +10,12 @@ import AST;
 import Set;
 import Exception;
 
-// Importamos ambas partes para fusionar el intérprete y el type checker
-import Checker;
-import CheckerB;
+// Importamos ambas partes para fusionar el intérprete y el type checker.
+// Debe ser `extend` (no `import`): TypePal solo ve las reglas `collect` de ambos
+// checkers si están en la misma jerarquía de extend; con `import` no se fusionan
+// en el espacio de sobrecarga y el solver falla con CallFailed.
+extend Checker;
+extend CheckerB;
 import Eval;
 
 import analysis::typepal::TypePal;

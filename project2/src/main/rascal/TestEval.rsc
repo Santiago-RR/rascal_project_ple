@@ -1,9 +1,6 @@
 module TestEval
 
-/*
- * Pruebas del intérprete de la parte B (Eval.rsc). Evalúa expresiones sueltas y
- * ejecuta instrucciones (for con print). No depende del checker ni de la parte A.
- */
+// Pruebas del intérprete de la parte B (Eval.rsc).
 
 import IO;
 import ParseTree;
@@ -13,27 +10,22 @@ import Lexical;
 import AST;
 import Eval;
 
-// Parsea + implode de una instrucción suelta. El tipo del parse debe ir
-// calificado (#SyntaxExpr::Instruction); si no, implode no resuelve los
-// constructores de los otros módulos de sintaxis.
+// El tipo del parse debe ir calificado (#SyntaxExpr::Instruction); si no, implode
+// no resuelve los constructores de los otros módulos de sintaxis.
 AST::Instruction toInst(str src) = implode(#AST::Instruction, parse(#SyntaxExpr::Instruction, src));
 
-// Parsea una expresión suelta. Se parsea como instrucción-expresión y se extrae
-// la Expression del AST; implode sobre Expression directamente no es fiable.
 AST::Expression toExpr(str src) {
   AST::Instruction i = toInst(src);
   if (expr(AST::Expression e) := i) return e;
   throw "No es una expresión: <src>";
 }
 
-// Evalúa una expresión en el ambiente vacío y compara el Value con el esperado.
 void expectVal(str src, Eval::Value expected) {
   Eval::Value got = eval(toExpr(src), ());
   str verdict = (got == expected) ? "OK" : "FALLA";
   println("[<verdict>] <src> =\> <got> (esperado <expected>)");
 }
 
-// Ejecuta una instrucción; sirve para ver la salida de print por consola.
 void runInst(str src) {
   println("--- ejecutando: <src>");
   exec(toInst(src), ());

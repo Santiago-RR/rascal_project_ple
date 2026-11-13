@@ -69,7 +69,7 @@ data Expression
   | call(Id name, list[Expression] args)
   | paren(Expression expr)
   | newObject(Type objType, list[ObjectBody] body)
-  | newObjectArgs(Type objType, NewArguments ctorArgs, list[ObjectBody] body)
+  | newObjectArgs(Type objType, NewArgs ctorArgs, list[ObjectBody] body)
   | memberAccess(Expression target, MemberName member)
   | methodCall(Expression target, MemberName member, list[Expression] args)
   | neg(Expression expr)
@@ -94,7 +94,7 @@ data Expression
 
 data MemberName = lower(Id name) | upper(TypeId name);
 
-data NewArguments = newArguments(list[Expression] args);
+data NewArgs = newArgs(list[Expression] args);
 data Literal = intLit(IntLit n) | trueLit() | falseLit() | charLit(CharLit c) | stringLit(StringLiteral s);
 data StringLiteral
   = plain(StrPlain text)
