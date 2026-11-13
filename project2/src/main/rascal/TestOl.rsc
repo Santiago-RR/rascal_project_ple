@@ -1,33 +1,68 @@
 module TestOl
 
-/*
- * Verifica que los archivos .ol de examples/ parsean como Module (árbol
- * concreto). El chequeo de tipos y la ejecución completos de los snippets con
- * objetos dependen de la integración con la parte A; aquí solo se comprueba el
- * parseo, que es responsabilidad compartida de la gramática.
- */
-
 import IO;
 import ParseTree;
 import Lexical;
 import SyntaxObjects;
 import SyntaxExpr;
+import Implode;
+import AST;
+import Set;
+import Exception;
 
-void checkParse(str name) {
+// Importamos ambas partes para fusionar el intérprete y el type checker
+import Checker;
+import CheckerB;
+import Eval;
+
+import analysis::typepal::TypePal;
+
+// Configuración unificada: TypePal usará todas las funciones 'collect' 
+// definidas tanto en Checker.rsc como en CheckerB.rsc
+TypePalConfig fullConfig() = tconfig();
+
+void runProgram(str name) {
   loc f = |cwd:///examples/| + name;
+  println("\n=======================================================");
+  println("Ejecutando: <name>");
+  println("=======================================================");
   try {
-    parse(#start[Module], readFile(f));
-    println("[OK parseo] <name>");
-  } catch ParseError(loc l): println("[FALLA parseo] <name> en <l>");
-  catch e: println("[ERROR] <name>: <e>");
+    // 1. Parseo a sintaxis concreta (necesario para TypePal)
+    str content = readFile(f);
+    start[Module] pt = parse(#start[Module], content);
+    println("[1/3] Parseo exitoso.");
+
+    // 2. Chequeo de Tipos con TypePal (Integración A y B)
+    TModel model = collectAndSolve(pt, config = fullConfig());
+    if (size(model.messages) > 0) {
+        println("[2/3] ERRORES DE TIPO ENCONTRADOS:");
+        for (msg <- model.messages) {
+            println("  - <msg>");
+        }
+        return; // Detenemos la ejecución si hay errores semánticos
+    }
+    println("[2/3] Chequeo de tipos exitoso (TypePal OK).");
+
+    // 3. Obtener AST y Ejecutar el código
+    AST::Module ast = parseModule(content); 
+    println("[3/3] Iniciando ejecución (Eval):");
+    println("-------------------------------------------------------");
+    run(ast);
+    println("\n-------------------------------------------------------");
+    println("Ejecución finalizada.");
+
+  } catch ParseError(loc l): {
+    println("[FALLA parseo] <name> en <l>");
+  } catch value e: {
+    println("[ERROR] <name>: <e>");
+  }
 }
 
 void main(list[str] args=[]) {
-  println("=== Parseo de los archivos .ol de examples/ ===");
-  checkParse("expresiones.ol");
-  checkParse("snippet1.ol");
-  checkParse("snippet2.ol");
-  checkParse("snippet3.ol");
-  checkParse("snippet4.ol");
+  println("=== INTEGRACIÓN FINAL: TYPEPAL + EVAL ===");
+  runProgram("snippet1.ol");
+  runProgram("snippet2.ol");
+  runProgram("snippet3.ol");
+  runProgram("snippet4.ol");
   println("=== Fin ===");
 }

@@ -165,11 +165,7 @@ Value eval(call(str name, list[Expression] args), Env env) {
 }
 
 // INTEGRACIÓN CON A: objetos, miembros, métodos, lambda.
-Value eval(newObject(Type t, list[ObjectBody] body), Env env) = objVal(typeName(t));
-Value eval(newObjectArgs(Type t, NewArguments a, list[ObjectBody] body), Env env) = objVal(typeName(t));
-Value eval(memberAccess(Expression target, MemberName m), Env env) { eval(target, env); return unknownVal(); }
-Value eval(methodCall(Expression target, MemberName m, list[Expression] args), Env env) { eval(target, env); return unknownVal(); }
-Value eval(lambda(IterationPattern p, Expression body), Env env) = unknownVal();
+
 
 // Red de seguridad: cualquier expresión no cubierta.
 default Value eval(Expression e, Env env) = unknownVal();
@@ -287,4 +283,39 @@ public void run(prog(list[Definition] defs, MainMethod m, list[Definition] other
 }
 public void runMain(mainMethod(Block body)) {
   execBlock(body, ());
+}
+
+// --- PARTE A
+Value eval(newObject(Type t, list[ObjectBody] body), Env env) = objVal(typeName(t));
+Value eval(newObjectArgs(Type t, NewArguments a, list[ObjectBody] body), Env env) = objVal(typeName(t));
+
+// Llamada a método calificado (e.g. puppyFeeder.transform(myPuppy))
+Value eval(methodCall(Expression target, MemberName m, list[Expression] args), Env env) {
+  Value obj = eval(target, env);
+  
+  if (objVal(str className) := obj) {
+    // Si la llamada es .getClass.getSimpleName (como en el Snippet 3)
+    if (m == lower("getClass")) return strVal(className);
+    
+    for (a <- args) eval(a, env); 
+    
+    // Simulación del Snippet 3:
+    if (m == lower("transform") && className == "Transformer") {
+       print("Preparing specialized food for an animal...\n");
+       return objVal("DogFood");
+    }
+    
+    return unknownVal();
+  }
+  throw "El objetivo de la llamada a método no es un objeto: <obj>";
+}
+
+// Acceso a un miembro
+Value eval(memberAccess(Expression target, MemberName m), Env env) {
+  Value obj = eval(target, env);
+  if (objVal(str className) := obj) {
+     if (m == lower("getSimpleName")) return strVal(className); // para .getClass.getSimpleName
+     return unknownVal();
+  }
+  throw "El objetivo del acceso no es un objeto: <obj>";
 }

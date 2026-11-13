@@ -1,126 +1,127 @@
 module Checker
 
-import AST;
-import analysis::typepal::Collector;
-import analysis::typepal::TypePal;
+import ParseTree;
+import SyntaxObjects;
+import Lexical;
+extend analysis::typepal::TypePal;
 
-// 1. Representación interna de los tipos de Objectilang en TypePal
+// 1. Representación interna de Tipos para la Parte A
 data AType
-  = aInt()
-  | aBool()
-  | aString()
-  | aClass(str name)                
+  = aClass(str name)                
   | aGeneric(str name)              
   | aMethod(list[AType] formals, AType returnType) 
+  | aUnknown()
   ;
 
-// 2. Roles semánticos (para distinguir clases, variables, métodos y genéricos)
-data IdRole
-  = classId()
-  | methodId()
-  | varId()
-  | typeParamId()
-  ;
+str prettyAType(aClass(str n)) = n;
+str prettyAType(aGeneric(str n)) = n;
+str prettyAType(aMethod(fs, ret)) = "(<fs>) -\> <ret>";
+str prettyAType(aUnknown()) = "?";
 
-// 3. Recolección (Collector) - Aquí definimos qué existe y qué se usa
+// 2. Roles semánticos (Punto 6)
+data IdRole = classId() | methodId() | varId() | typeParamId();
 
-// Módulo principal
-void collect(current: prog(list[Definition] defs, MainMethod main, list[Definition] otherDefs), Collector c) {
+// 3. Collector principal
+void collect(current: (Module) `<Definition* defs> <MainMethod main> <Definition* otherDefs>`, Collector c) {
     c.enterScope(current); 
-    collect(defs, c);
-    collect(main, c);
-    collect(otherDefs, c);
+    for (arg <- current.args) collect(arg, c);
     c.leaveScope(current);
 }
 
-// ==========================================
-// TAREAS PERSONA A: Objetos y Tipos
-// ==========================================
-
-// Definición de Objetos
-void collect(current: defObject(TypeId name, list[GenericParams] params, list[Extends] parent, list[Constructor] constructor, list[ObjectBody] body), Collector c) {
-    c.define("<name>", classId(), current, defType(aClass(name)));
+// Objetos y Varianza
+void collect(current: (DefObject) `object <TypeId name> <GenericParams? params> <Extends? parent> <Constructor? constructor> <ObjectBody? body>`, Collector c) {
+    c.define("<name>", classId(), current, defType(aClass("<name>")));
+    c.enterScope(current); 
     
-    c.enterScope(current); // Todo lo que esté adentro (métodos/campos) pertenece a esta clase
-    collect(params, c);
-    collect(parent, c);
-    collect(constructor, c);
-    collect(body, c);
+    for (arg <- current.args) collect(arg, c);
     c.leaveScope(current);
 }
 
-// Parámetros Genéricos (+A, -In, +Out)
-void collect(current: genericParameter(list[Variance] variance, TypeId name), Collector c) {
-    c.define("<name>", typeParamId(), current, defType(aGeneric(name)));
+// Parámetros Genéricos
+void collect(current: (GenericParameter) `<Variance? variance> <TypeId name>`, Collector c) {
+    c.define("<name>", typeParamId(), current, defType(aGeneric("<name>")));
 }
 
-// ==========================================
-// PUNTO 6: Verificar que los elementos existan
-// ==========================================
-
-// Herencia: Asegurar que la clase de la que heredo existe
-void collect(current: extends(TypeId superType), Collector c) {
-    c.use(superType, {classId()}); // Exigimos que el nombre exista y que sea una clase
+// PUNTO 6: Verificación de Existencia de Herencia y Tipos
+void collect(current: (Extends) `extends <TypeId superType>`, Collector c) {
+    c.use(superType, {classId()}); 
 }
 
-// Uso de Tipos (ej. List[Dog], input: In): Asegurar que el tipo existe
-void collect(current: userType(TypeId name, list[TypeArgs] args), Collector c) {
-    // Un tipo de usuario puede ser una clase existente (Dog) o un genérico (In, Out)
+void collect(current: (UserType) `<TypeId name> <TypeArgs? args>`, Collector c) {
     c.use(name, {classId(), typeParamId()}); 
-    collect(args, c);
+    for (arg <- current.args) collect(arg, c);
 }
 
-// ==========================================
-// TAREAS PERSONA A: Declaraciones y Métodos
-// ==========================================
+// ======================================================================
+// Métodos (Múltiples reglas para manejar la sintaxis opcional ":" Type)
+// ======================================================================
 
-// Parámetros del constructor (val item: A)
-void collect(current: paramDecl(Binding mode, Id name, Type paramType), Collector c) {
-    c.define("<name>", varId(), current);
-    collect(paramType, c);
-}
-
-// Declaraciones de variables (val max = ...)
-void collect(current: declaration(Binding mode, Id name, list[Type] declaredType, Expression expr), Collector c) {
-    c.define("<name>", varId(), current); 
-    collect(declaredType, c);
-    collect(expr, c); 
-}
-
-// Métodos miembros (override transform(...) ...)
-void collect(current: memberMethod(list[Override] override, Id name, list[MethodParam] params, list[Type] returnType, MethodBody body), Collector c) {
-    c.define("<name>", methodId(), current);
-    
-    c.enterScope(current); // El método abre un nuevo ámbito para sus parámetros
-    collect(params, c);
-    collect(returnType, c);
-    collect(body, c);
+// 1. memberMethod CON tipo de retorno
+void collect(current: (DefMethod) `<Override? override> <Id name> ( <{MethodParam ","}* params> ) : <Type returnType> <MethodBody body>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
     c.leaveScope(current);
 }
 
-// Parámetros de métodos (animal: Animal)
-void collect(current: methodParam(Id name, Type paramType), Collector c) {
-    c.define("<name>", varId(), current);
-    collect(paramType, c);
+// 2. memberMethod SIN tipo de retorno
+void collect(current: (DefMethod) `<Override? override> <Id name> ( <{MethodParam ","}* params> ) <MethodBody body>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
+    c.leaveScope(current);
 }
 
-// Método Main
-void collect(current: mainMethod(Block body), Collector c) {
+// 3. memberMethod CON igual y CON tipo de retorno
+void collect(current: (DefMethod) `<Override? override> <Id name> = method ( <{MethodParam ","}* params> ) : <Type returnType> <MethodBody body>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
+    c.leaveScope(current);
+}
+
+// 4. memberMethod CON igual y SIN tipo de retorno
+void collect(current: (DefMethod) `<Override? override> <Id name> = method ( <{MethodParam ","}* params> ) <MethodBody body>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
+    c.leaveScope(current);
+}
+
+// 5. qualifiedMethod CON tipo
+void collect(current: (DefMethod) `<TypeId owner> . <Id name> = method ( <{MethodParam ","}* params> ) : <Type returnType> <MethodBody? qualifiedBody>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
+    c.leaveScope(current);
+}
+
+// 6. qualifiedMethod SIN tipo
+void collect(current: (DefMethod) `<TypeId owner> . <Id name> = method ( <{MethodParam ","}* params> ) <MethodBody? qualifiedBody>`, Collector c) {
+    c.define("<name>", methodId(), current, defType(aUnknown()));
+    c.enterScope(current); 
+    for (arg <- current.args) collect(arg, c);
+    c.leaveScope(current);
+}
+
+// ======================================================================
+
+// Parámetros de método
+void collect(current: (MethodParam) `<Id name> : <Type paramType>`, Collector c) {
+    c.define("<name>", varId(), current, defType(aUnknown()));
+    c.use(paramType, {classId(), typeParamId()});
+    for (arg <- current.args) collect(arg, c);
+}
+
+// Variables en Objetos y Constructores
+void collect(current: (ParamDecl) `<Binding mode> <Id name> : <Type paramType>`, Collector c) {
+    c.define("<name>", varId(), current, defType(aUnknown()));
+    for (arg <- current.args) collect(arg, c);
+}
+
+// Main
+void collect(current: (MainMethod) `method main <Block body>`, Collector c) {
     c.enterScope(current);
-    collect(body, c);
+    for (arg <- current.args) collect(arg, c);
     c.leaveScope(current);
 }
-
-// ==========================================
-// Utilidades de recolección
-// ==========================================
-void collect(list[value] elements, Collector c) {
-    for (e <- elements) collect(e, c);
-}
-
-// Ignoramos nodos que aún no procesamos (como expresiones matemáticas que hará B)
-void collect(value v, Collector c) { }
-
-// Configuración y ejecución del Type Checker
-TypePalConfig objectilangConfig() = tconfig(collect);
-public TModel checkProgram(AST::Module p) = newTyping(p, objectilangConfig());
