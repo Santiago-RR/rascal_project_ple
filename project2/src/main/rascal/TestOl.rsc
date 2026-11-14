@@ -9,6 +9,7 @@ import Implode;
 import AST;
 import Set;
 import Exception;
+import Message;
 
 // Importamos ambas partes para fusionar el intérprete y el type checker.
 // Debe ser `extend` (no `import`): TypePal solo ve las reglas `collect` de ambos
@@ -35,11 +36,13 @@ void runProgram(str name) {
     start[Module] pt = parse(#start[Module], content);
     println("[1/3] Parseo exitoso.");
 
-    // 2. Chequeo de Tipos con TypePal (Integración A y B)
+    // 2. Chequeo de Tipos con TypePal (Integración A y B). Solo los mensajes
+    // error(...) detienen la ejecución; los info/warning de TypePal no.
     TModel model = collectAndSolve(pt, config = fullConfig());
-    if (size(model.messages) > 0) {
+    list[Message] errores = [msg | msg <- model.messages, error(_, _) := msg];
+    if (size(errores) > 0) {
         println("[2/3] ERRORES DE TIPO ENCONTRADOS:");
-        for (msg <- model.messages) {
+        for (msg <- errores) {
             println("  - <msg>");
         }
         return; // Detenemos la ejecución si hay errores semánticos
