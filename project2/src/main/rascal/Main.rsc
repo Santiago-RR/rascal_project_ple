@@ -13,7 +13,8 @@ import SyntaxObjects;
 import SyntaxExpr;
 import AST;
 import Implode;
-import CheckerB;
+extend CheckerB;
+extend Checker;
 import Eval;
 
 int countErrors(list[Message] msgs) = (0 | it + 1 | m <- msgs, error(_, _) := m);
@@ -28,7 +29,7 @@ public bool runSource(str source) {
     return false;
   }
 
-  list[Message] msgs = messagesOfModule(pt);
+  list[Message] msgs = collectAndSolve(pt, config = tconfig()).messages;
   int errs = countErrors(msgs);
   if (errs > 0) {
     println("El programa tiene <errs> error(es) de tipo:");

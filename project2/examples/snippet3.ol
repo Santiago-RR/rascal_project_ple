@@ -6,7 +6,7 @@ object Food
 object DogFood extends Food
 
 object Transformer[-In, +Out]
-Transform.transform = method(input: In): Out
+Transformer.transform = method(input: In): Out
 
 method main {
   val animalFeeder: Transformer[Animal, DogFood] = new Transformer[Animal, DogFood] {
